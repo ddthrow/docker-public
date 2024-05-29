@@ -1,3 +1,5 @@
+Here are some snippets of my working Fireflyiii and fireflyii-importer.
+
 
 # MANUAL IMPORT Process
 
