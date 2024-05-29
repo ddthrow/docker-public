@@ -1,0 +1,84 @@
+version: '3.7'
+
+networks:
+  ff_backend:
+  t2_proxy:
+    external: true
+
+services:
+
+  ffiii-postgres:
+    image: docker.io/library/postgres:13
+    container_name: ffiii-postgres
+    restart: unless-stopped
+    networks:
+      - ff_backend
+    volumes:
+      - ./ffiii-pgdata:/var/lib/postgresql/data
+    ports:
+      - 5454:5432
+    environment:
+      POSTGRES_DB: $DB_DATABASE
+      POSTGRES_USER: $DB_USERNAME
+      POSTGRES_PASSWORD: $DB_PASSWORD
+      
+  fireflyiii:
+    image: fireflyiii/core:latest
+    container_name: fireflyiii
+    restart: always
+    volumes:
+      - ./ffiii-import:/var/www/html/storage/upload
+#    ports:
+ #     - 5780:8080
+    networks:
+      - t2_proxy
+      - ff_backend
+    environment:
+      - DB_HOST=ip.addr.of.host
+      - DB_DATABASE=$DB_DATABASE
+      - DB_USERNAME=$DB_USERNAME
+      - DB_PORT=5454
+      - DB_CONNECTION=pgsql
+      - DB_PASSWORD=$DB_PASSWORD
+      - APP_KEY=$APP_KEY
+      - APP_URL=$APP_URL
+      - TRUSTED_PROXIES=**
+      - STATIC_CRON_TOKEN=$CRON_TOKEN
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.fireflyiii.entrypoints=http"
+      - "traefik.http.routers.fireflyiii.rule=Host(`ff.local.domain.com`)"
+      - "traefik.http.middlewares.fireflyiii-https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.fireflyiii.middlewares=fireflyiii-https-redirect"
+      - "traefik.http.routers.fireflyiii-secure.entrypoints=https"
+      - "traefik.http.routers.fireflyiii-secure.rule=Host(`ff.local.domain.com`)"
+      - "traefik.http.routers.fireflyiii-secure.tls=true"
+      - "traefik.http.routers.fireflyiii-secure.service=fireflyiii"
+      - "traefik.http.services.fireflyiii.loadbalancer.server.port=8080"
+      - "traefik.docker.network=t2_proxy"      
+      
+  fireflyiii-data-importer:
+    image: fireflyiii/data-importer:latest
+    container_name: fireflyiii-data-importer
+    restart: always
+    networks:
+      - ff_backend
+    ports:
+      - 5781:8080
+    volumes:
+      - ./importer-config:/configurations
+      - ./ffiii-import:/import
+    environment:
+      - JSON_CONFIGURATION_DIR=/configurations
+      - FIREFLY_III_ACCESS_TOKEN=$FFIIITOKEN
+      - FIREFLY_III_URL=https://ff.local.domain.com
+      - IMPORT_DIR_ALLOWLIST=/import
+    #  - WEB_SERVER=false
+
+  ffiii-cron:
+    image: alpine
+    container_name: ffiii-cron
+    restart: always
+    networks:
+      - ff_backend
+    command: sh -c "echo \"40 13 * * * wget -qO- https://ff.local.domain.com/api/v1/cron/longstringofcharacters\" | crontab - && crond -f -L /dev/stdout"
