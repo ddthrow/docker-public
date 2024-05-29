@@ -1,0 +1,71 @@
+{
+    "version": 3,
+    "source": "fidi-1.2.1",
+    "created_at": "2023-08-20T18:05:34+02:00",
+    "date": "m\/d\/Y",
+    "default_account": 1,
+    "delimiter": "comma",
+    "headers": true,
+    "rules": false,
+    "skip_form": false,
+    "add_import_tag": true,
+    "roles": [
+        "date_transaction",
+        "description",
+        "amount_debit",
+        "amount_credit",
+        "category-name",
+        "_ignore",
+        "account-name"
+    ],
+    "do_mapping": [
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+    ],
+    "mapping": {
+        "4": {
+            "ATM": 10,
+            "Auto + Gas": 12,
+            "Cable + Phone": 8,
+            "Checks Written": 2,
+            "Credit Card Payments": 5,
+            "Insurance": 4,
+            "Paychecks": 1,
+            "Personal + Family": 11,
+            "Service Charges + Fees": 9,
+            "Services + Supplies": 7,
+            "Transfers": 3,
+            "Utilities": 6
+        },
+        "6": {
+            "Bank1 Checking": 1,
+            "Credit Card 1": 31
+        }
+    },
+    "duplicate_detection_method": "classic",
+    "ignore_duplicate_lines": true,
+    "unique_column_index": 0,
+    "unique_column_type": "internal_reference",
+    "flow": "file",
+    "identifier": "0",
+    "connection": "0",
+    "ignore_spectre_categories": false,
+    "map_all_data": true,
+    "accounts": [],
+    "date_range": "",
+    "date_range_number": 30,
+    "date_range_unit": "d",
+    "date_not_before": "",
+    "date_not_after": "",
+    "nordigen_country": "",
+    "nordigen_bank": "",
+    "nordigen_requisitions": [],
+    "nordigen_max_days": "90",
+    "conversion": true,
+    "ignore_duplicate_transactions": true
+}
